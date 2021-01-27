@@ -1,10 +1,7 @@
-import { UserData } from './entities/user-data'
-import { UserRepository } from './ports/user-repository'
+import { UserData } from '../../entities/user-data'
+import { UserRepository } from '../ports/user-repository'
 import { InMemoryUserRepository } from './repository/in-memory-user-repository'
 import { RegisterUserOnMalingList } from './register-user-on-mailling-list'
-import { left } from './shared/either'
-import { InvalidEmailError } from './entities/errors/invalid-email-error'
-import { InvalidNameError } from './entities/errors/invalid-name-error'
 
 describe('Register user on maling list use case', () => {
   test('should add user with complete data to mailing list', async () => {
@@ -25,10 +22,10 @@ describe('Register user on maling list use case', () => {
     const usecase: RegisterUserOnMalingList = new RegisterUserOnMalingList(repo)
     const name = 'any_name'
     const invalidemail = 'invalid_email'
-    const response = await usecase.registerUserOnMalingList({ name: name, email: invalidemail })
+    const response = (await usecase.registerUserOnMalingList({ name: name, email: invalidemail })).value as Error
     const user = await repo.findUserByEmail(invalidemail)
     expect(user).toBeNull()
-    expect(response).toEqual(left(new InvalidEmailError()))
+    expect(response.name).toEqual('InvalidEmailError')
   })
 
   test('should not add user with invalid name to mailing list', async () => {
@@ -37,9 +34,9 @@ describe('Register user on maling list use case', () => {
     const usecase: RegisterUserOnMalingList = new RegisterUserOnMalingList(repo)
     const invalidname = ''
     const email = 'any@mail.com'
-    const response = await usecase.registerUserOnMalingList({ name: invalidname, email: email })
+    const response = (await usecase.registerUserOnMalingList({ name: invalidname, email: email })).value as Error
     const user = await repo.findUserByEmail(email)
     expect(user).toBeNull()
-    expect(response).toEqual(left(new InvalidNameError()))
+    expect(response.name).toEqual('InvalidNameError')
   })
 })
