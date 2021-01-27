@@ -1,9 +1,9 @@
-import { InvalidEmailError } from './entities/errors/invalid-email-error'
-import { InvalidNameError } from './entities/errors/invalid-name-error'
-import { UserRepository } from './ports/user-repository'
-import { Either, left, right } from './shared/either'
-import { UserData } from './entities/user-data'
-import { User } from './entities/user'
+import { InvalidEmailError } from '../../entities/errors/invalid-email-error'
+import { InvalidNameError } from '../../entities/errors/invalid-name-error'
+import { UserRepository } from '../ports/user-repository'
+import { Either, left, right } from '../../shared/either'
+import { UserData } from '../../entities/user-data'
+import { User } from '../../entities/user'
 
 export class RegisterUserOnMalingList {
     private readonly userRepo: UserRepository
