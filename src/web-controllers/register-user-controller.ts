@@ -1,32 +1,36 @@
 import { UserData } from '../entities/user-data'
-import { RegisterUserOnMalingList } from '../usecases/register-user-on-mailing-list/register-user-on-mailling-list'
+import { UseCase } from '../usecases/ports'
 import { MissingParamError } from './errors/missing-param-error'
 import { HttpRequest, HttpResponse } from './ports'
-import { badRequest, created } from './util/http-helper'
+import { badRequest, created, serverError } from './util/http-helper'
 
 export class RegisterUserController {
-    private readonly usecase: RegisterUserOnMalingList
+    private readonly usecase: UseCase
 
-    constructor (usecase: RegisterUserOnMalingList) {
+    constructor (usecase: UseCase) {
       this.usecase = usecase
     }
 
     public async handle (request: HttpRequest): Promise<HttpResponse> {
-      if (!(request.body.name) || !(request.body.email)) {
-        let missingParam = !(request.body.name) ? 'name ' : ''
-        missingParam += !(request.body.email) ? 'email' : ''
-        return badRequest(new MissingParamError(missingParam.trim()))
-      }
+      try {
+        if (!(request.body.name) || !(request.body.email)) {
+          let missingParam = !(request.body.name) ? 'name ' : ''
+          missingParam += !(request.body.email) ? 'email' : ''
+          return badRequest(new MissingParamError(missingParam.trim()))
+        }
 
-      const userData: UserData = request.body
-      const response = await this.usecase.registerUserOnMalingList(userData)
+        const userData: UserData = request.body
+        const response = await this.usecase.perform(userData)
 
-      if (response.isLeft()) {
-        return badRequest(response.value)
-      }
+        if (response.isLeft()) {
+          return badRequest(response.value)
+        }
 
-      if (response.isRight()) {
-        return created(response.value)
+        if (response.isRight()) {
+          return created(response.value)
+        }
+      } catch (error) {
+        return serverError(error)
       }
     }
 }
